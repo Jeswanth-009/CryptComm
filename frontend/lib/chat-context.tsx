@@ -264,13 +264,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
     // Room joined handler
     handlers.push(
-      ws.on('room_joined', (msg) => {
+      ws.on('room_joined', async (msg) => {
         const payload = msg.payload as { room: Room };
         dispatch({ type: 'ADD_ROOM', payload: payload.room });
         dispatch({ type: 'SET_CURRENT_ROOM', payload: payload.room });
         
-        // Import public keys for all participants
-        payload.room.participants?.forEach(async (participant: User) => {
+        // Import public keys for all participants (await all to complete)
+        const keyImportPromises = (payload.room.participants || []).map(async (participant: User) => {
           try {
             const publicKey = await importPublicKey(participant.publicKey);
             dispatch({
@@ -282,6 +282,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             console.error('Failed to import public key:', error);
           }
         });
+        
+        // Wait for all keys to be imported before allowing messages
+        await Promise.all(keyImportPromises);
       })
     );
 
@@ -516,6 +519,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
     // Get public keys for all room participants
     const recipientKeys = new Map<string, CryptoKey>();
+    const missingKeys: string[] = [];
     
     // Include self
     if (state.userId && state.keyPair.publicKey) {
@@ -527,7 +531,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       const publicKey = state.publicKeys.get(participant.id);
       if (publicKey) {
         recipientKeys.set(participant.id, publicKey);
+      } else {
+        missingKeys.push(participant.username);
       }
+    }
+
+    // Warn if any keys are missing
+    if (missingKeys.length > 0) {
+      console.warn(`Missing public keys for: ${missingKeys.join(', ')}`);
+      // Still send the message to available recipients
     }
 
     // Encrypt the message
