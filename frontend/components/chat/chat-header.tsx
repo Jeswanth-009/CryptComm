@@ -28,14 +28,14 @@ export function ChatHeader() {
     switch (state.connectionStatus) {
       case 'connected':
         return (
-          <Badge variant="success\" className="gap-1">
+          <Badge variant="default" className="gap-1 bg-green-500">
             <Wifi className="h-3 w-3" />
             Connected
           </Badge>
         );
       case 'connecting':
         return (
-          <Badge variant="warning" className="gap-1">
+          <Badge variant="secondary" className="gap-1 bg-yellow-500">
             <Loader2 className="h-3 w-3 animate-spin" />
             Connecting
           </Badge>
