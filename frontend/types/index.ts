@@ -66,6 +66,7 @@ export interface EncryptionResult {
 // WebSocket message types
 export type WebSocketMessageType =
   | 'connect'
+  | 'connected'
   | 'disconnect'
   | 'join_room'
   | 'leave_room'
@@ -75,11 +76,19 @@ export type WebSocketMessageType =
   | 'user_joined'
   | 'user_left'
   | 'room_created'
+  | 'room_joined'
+  | 'room_left'
   | 'room_list'
+  | 'room_list_updated'
   | 'user_list'
+  | 'user_joined_room'
+  | 'user_left_room'
+  | 'user_online'
+  | 'user_offline'
   | 'error'
   | 'key_exchange'
   | 'verify_identity'
+  | 'ping'
   | 'pong';
 
 export interface WebSocketMessage {

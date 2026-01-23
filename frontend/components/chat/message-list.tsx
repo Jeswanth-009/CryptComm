@@ -217,7 +217,7 @@ export function MessageList() {
       <div className="py-4">
         {/* Room encryption info */}
         <div className="flex justify-center mb-6">
-          <Badge variant="outline\" className="gap-2">
+          <Badge variant="outline" className="gap-2">
             <Lock className="h-3 w-3" />
             Messages are end-to-end encrypted
           </Badge>
