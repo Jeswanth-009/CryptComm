@@ -75,14 +75,14 @@ export function MessageInput() {
 
   if (!state.currentRoom) {
     return (
-      <div className="border-t p-4 bg-muted/30">
+      <div className="border-t p-2 sm:p-4 bg-muted/30">
         <div className="flex gap-2">
           <Input
             disabled
             placeholder="Select a room to start chatting..."
-            className="flex-1"
+            className="flex-1 text-sm"
           />
-          <Button disabled size="icon">
+          <Button disabled size="icon" className="h-9 w-9 sm:h-10 sm:w-10">
             <Send className="h-4 w-4" />
           </Button>
         </div>
@@ -98,7 +98,7 @@ export function MessageInput() {
     .filter(Boolean);
 
   return (
-    <div className="border-t p-4 bg-background">
+    <div className="border-t p-2 sm:p-4 bg-background">
       {/* Typing indicator */}
       {typingUsernames.length > 0 && (
         <div className="text-xs text-muted-foreground mb-2 animate-pulse">
@@ -120,7 +120,7 @@ export function MessageInput() {
             placeholder="Type a secure message..."
             disabled={isSending}
             maxLength={10000}
-            className="pr-10"
+            className="pr-10 text-sm sm:text-base"
           />
           <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         </div>
@@ -130,7 +130,7 @@ export function MessageInput() {
           disabled={!canSend}
           size="icon"
           className={cn(
-            'transition-colors',
+            'transition-colors h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0',
             canSend && 'bg-primary hover:bg-primary/90'
           )}
         >

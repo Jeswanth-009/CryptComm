@@ -17,11 +17,16 @@ import {
   Hash,
   Users,
   Loader2,
+  Menu,
 } from 'lucide-react';
 import { useChat } from '@/lib/chat-context';
 import { cn } from '@/lib/utils';
 
-export function ChatHeader() {
+interface ChatHeaderProps {
+  onMenuClick?: () => void;
+}
+
+export function ChatHeader({ onMenuClick }: ChatHeaderProps) {
   const { state, leaveRoom, disconnect } = useChat();
 
   const getConnectionBadge = () => {
@@ -58,38 +63,50 @@ export function ChatHeader() {
   };
 
   return (
-    <header className="h-16 border-b bg-background flex items-center justify-between px-4">
-      {/* Left section - Room info */}
-      <div className="flex items-center gap-4">
+    <header className="h-14 sm:h-16 border-b bg-background flex items-center justify-between px-2 sm:px-4">
+      {/* Left section - Menu button and Room info */}
+      <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+        {/* Mobile menu button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden flex-shrink-0"
+          onClick={onMenuClick}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
         {state.currentRoom ? (
           <>
-            <div className="flex items-center gap-2">
-              <Hash className="h-5 w-5 text-muted-foreground" />
-              <h1 className="font-semibold text-lg">{state.currentRoom.name}</h1>
+            <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+              <Hash className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
+              <h1 className="font-semibold text-sm sm:text-lg truncate">{state.currentRoom.name}</h1>
             </div>
             
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
               <Lock className="h-4 w-4" />
               <span>Encrypted</span>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="hidden lg:flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
               <span>{state.currentRoom.participants?.length || 0} users</span>
             </div>
           </>
         ) : (
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" />
-            <h1 className="font-semibold text-lg">CryptComm</h1>
-            <span className="text-sm text-muted-foreground">Secure Messaging</span>
+          <div className="flex items-center gap-2 min-w-0">
+            <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <h1 className="font-semibold text-sm sm:text-lg truncate">CryptComm</h1>
+            <span className="hidden sm:inline text-sm text-muted-foreground">Secure Messaging</span>
           </div>
         )}
       </div>
 
       {/* Right section - Status and actions */}
-      <div className="flex items-center gap-3">
-        {getConnectionBadge()}
+      <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+        <div className="hidden sm:block">
+          {getConnectionBadge()}
+        </div>
 
         {state.currentRoom && (
           <TooltipProvider>
@@ -99,6 +116,7 @@ export function ChatHeader() {
                   variant="ghost"
                   size="sm"
                   onClick={() => leaveRoom(state.currentRoom!.id)}
+                  className="hidden sm:flex"
                 >
                   Leave Room
                 </Button>
@@ -116,7 +134,7 @@ export function ChatHeader() {
                   variant="ghost"
                   size="icon"
                   onClick={disconnect}
-                  className="text-muted-foreground hover:text-destructive"
+                  className="text-muted-foreground hover:text-destructive h-8 w-8 sm:h-10 sm:w-10"
                 >
                   <LogOut className="h-4 w-4" />
                 </Button>

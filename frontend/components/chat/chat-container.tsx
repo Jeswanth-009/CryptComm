@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import { ChatHeader } from './chat-header';
 import { RoomList } from './room-list';
 import { MessageList } from './message-list';
@@ -8,6 +9,7 @@ import { UserList } from './user-list';
 import { LoginForm } from './login-form';
 import { useChat } from '@/lib/chat-context';
 import { Loader2, Shield } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 function LoadingScreen() {
   return (
@@ -26,6 +28,7 @@ function LoadingScreen() {
 
 export function ChatContainer() {
   const { state } = useChat();
+  const [isRoomListOpen, setIsRoomListOpen] = useState(false);
 
   // Show login if not connected
   if (!state.userId) {
@@ -38,11 +41,18 @@ export function ChatContainer() {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <ChatHeader />
+      <ChatHeader onMenuClick={() => setIsRoomListOpen(true)} />
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Room List Sidebar */}
+        {/* Mobile Room List Drawer */}
+        <Sheet open={isRoomListOpen} onOpenChange={setIsRoomListOpen}>
+          <SheetContent side="left" className="p-0 w-72">
+            <RoomList onRoomSelect={() => setIsRoomListOpen(false)} />
+          </SheetContent>
+        </Sheet>
+
+        {/* Desktop Room List Sidebar */}
         <aside className="w-64 flex-shrink-0 hidden md:block">
           <RoomList />
         </aside>

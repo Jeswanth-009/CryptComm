@@ -40,6 +40,10 @@ interface RoomItemProps {
   onClick: () => void;
 }
 
+interface RoomListProps {
+  onRoomSelect?: () => void;
+}
+
 function formatExpiry(expiresAt: string | null): string {
   if (!expiresAt) return 'No expiry';
 
@@ -86,7 +90,7 @@ function RoomItem({ room, isActive, onClick }: RoomItemProps) {
   );
 }
 
-export function RoomList() {
+export function RoomList({ onRoomSelect }: RoomListProps = {}) {
   const { state, joinRoom, createRoom } = useChat();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newRoomName, setNewRoomName] = useState('');
@@ -118,6 +122,7 @@ export function RoomList() {
   const handleJoinRoom = (room: Room) => {
     if (state.currentRoom?.id !== room.id) {
       joinRoom(room.id);
+      onRoomSelect?.(); // Call callback when room is selected (for mobile drawer)
     }
   };
 

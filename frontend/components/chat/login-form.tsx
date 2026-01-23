@@ -48,14 +48,14 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted p-3 sm:p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-            <Shield className="h-8 w-8 text-primary" />
+        <CardHeader className="text-center space-y-3 sm:space-y-4">
+          <div className="mx-auto mb-2 sm:mb-4 w-12 h-12 sm:w-16 sm:h-16 bg-primary/10 rounded-full flex items-center justify-center">
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl">CryptComm</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl sm:text-2xl">CryptComm</CardTitle>
+          <CardDescription className="text-sm">
             End-to-end encrypted secure messaging
           </CardDescription>
         </CardHeader>
@@ -63,7 +63,7 @@ export function LoginForm() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username" className="text-sm">Username</Label>
               <Input
                 id="username"
                 type="text"
@@ -77,6 +77,7 @@ export function LoginForm() {
                 maxLength={20}
                 autoComplete="username"
                 autoFocus
+                className="text-sm sm:text-base"
               />
               <p className="text-xs text-muted-foreground">
                 3-20 characters. Letters, numbers, underscores, and hyphens only.
