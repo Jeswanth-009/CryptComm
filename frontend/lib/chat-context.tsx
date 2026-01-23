@@ -47,6 +47,7 @@ type ChatAction =
   | { type: 'ADD_ROOM'; payload: Room }
   | { type: 'SET_CURRENT_ROOM'; payload: Room | null }
   | { type: 'ADD_USER'; payload: User }
+  | { type: 'ADD_USER_TO_ROOM'; payload: { roomId: string; user: User } }
   | { type: 'UPDATE_USER'; payload: Partial<User> & { id: string } }
   | { type: 'REMOVE_USER'; payload: string }
   | { type: 'ADD_MESSAGE'; payload: { roomId: string; message: DecryptedMessage } }
@@ -119,6 +120,36 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
       const newUsers = new Map(state.users);
       newUsers.set(action.payload.id, action.payload);
       return { ...state, users: newUsers };
+    }
+
+    case 'ADD_USER_TO_ROOM': {
+      // Update the room in rooms list
+      const roomIndex = state.rooms.findIndex((r) => r.id === action.payload.roomId);
+      const newRooms = [...state.rooms];
+      if (roomIndex >= 0) {
+        const room = newRooms[roomIndex];
+        const participants = room.participants || [];
+        if (!participants.find((p) => p.id === action.payload.user.id)) {
+          newRooms[roomIndex] = {
+            ...room,
+            participants: [...participants, action.payload.user],
+          };
+        }
+      }
+
+      // Update current room if it matches
+      let newCurrentRoom = state.currentRoom;
+      if (state.currentRoom?.id === action.payload.roomId) {
+        const participants = state.currentRoom.participants || [];
+        if (!participants.find((p) => p.id === action.payload.user.id)) {
+          newCurrentRoom = {
+            ...state.currentRoom,
+            participants: [...participants, action.payload.user],
+          };
+        }
+      }
+
+      return { ...state, rooms: newRooms, currentRoom: newCurrentRoom };
     }
 
     case 'UPDATE_USER': {
@@ -293,6 +324,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       ws.on('user_joined_room', async (msg) => {
         const payload = msg.payload as { roomId: string; user: User };
         dispatch({ type: 'ADD_USER', payload: payload.user });
+        dispatch({ type: 'ADD_USER_TO_ROOM', payload: { roomId: payload.roomId, user: payload.user } });
         
         try {
           const publicKey = await importPublicKey(payload.user.publicKey);
