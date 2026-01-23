@@ -187,7 +187,7 @@ export async function encryptMessage(
   const encrypted = await window.crypto.subtle.encrypt(
     {
       name: 'AES-GCM',
-      iv: iv.buffer,
+      iv: iv,
     },
     aesKey,
     data
@@ -268,7 +268,7 @@ export async function decryptFromSender(
 }
 
 // Utility functions
-export function arrayBufferToBase64(buffer: ArrayBuffer): string {
+export function arrayBufferToBase64(buffer: ArrayBuffer | ArrayBufferLike): string {
   const bytes = new Uint8Array(buffer);
   let binary = '';
   for (let i = 0; i < bytes.byteLength; i++) {
