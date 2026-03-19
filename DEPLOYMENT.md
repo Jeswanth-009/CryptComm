@@ -1,12 +1,12 @@
 # CryptComm Deployment Guide
 
-This guide covers deploying CryptComm with the frontend on Vercel and backend on Railway.
+This guide covers deploying CryptComm with the frontend on Vercel and backend on Render.
 
 ## Prerequisites
 
 - GitHub account
 - Vercel account (free tier works)
-- Railway account (free tier works)
+- Render account (free tier works)
 - Git installed locally
 
 ## Step 1: Push to GitHub
@@ -41,24 +41,26 @@ git branch -M main
 git push -u origin main
 ```
 
-## Step 2: Deploy Backend to Railway
+## Step 2: Deploy Backend to Render
 
-1. **Go to Railway** (https://railway.app/)
-   - Sign up or log in
-   - Click "New Project"
-   - Select "Deploy from GitHub repo"
-   - Authorize Railway to access your GitHub account
-   - Select your `cryptcomm` repository
+1. **Go to Render** (https://render.com/)
+   - Sign up or log in with your GitHub account
+   - Click "New +" → "Web Service"
+   - Select "Build and deploy from a Git repository"
+   - Click "Connect" next to your `cryptcomm` repository (you may need to configure GitHub access)
 
-2. **Configure the Backend Service**
-   - Railway will auto-detect the monorepo
-   - Click on the service → "Settings"
-   - Set **Root Directory**: `backend`
-   - Set **Build Command**: `npm install && npm run build`
-   - Set **Start Command**: `npm run start`
+2. **Configure the Web Service**
+   - **Name**: `cryptcomm-backend` (or your preferred name)
+   - **Region**: Choose closest to your users (e.g., Oregon)
+   - **Branch**: `main`
+   - **Root Directory**: `backend`
+   - **Runtime**: `Node`
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npm run start`
+   - **Plan**: `Free`
 
 3. **Add Environment Variables**
-   - Go to "Variables" tab
+   - Scroll to "Environment Variables" section
    - Add the following:
      ```
      PORT=3001
@@ -66,12 +68,19 @@ git push -u origin main
      CORS_ORIGIN=* (we'll update this after Vercel deployment)
      ```
 
-4. **Deploy and Get URL**
-   - Click "Deploy"
-   - Wait for deployment to complete
-   - Find your backend URL: `https://your-app-name.up.railway.app`
-   - Test health endpoint: `https://your-app-name.up.railway.app/health`
-   - Note your WebSocket URL: `wss://your-app-name.up.railway.app`
+4. **Configure Health Check**
+   - Scroll to "Health & Alerts" section
+   - Set **Health Check Path**: `/health`
+   - This ensures Render monitors your service properly
+
+5. **Deploy and Get URL**
+   - Click "Create Web Service"
+   - Wait for deployment to complete (first deploy takes 3-5 minutes)
+   - Find your backend URL: `https://cryptcomm-backend.onrender.com` (or your custom name)
+   - Test health endpoint: `https://cryptcomm-backend.onrender.com/health`
+   - Note your WebSocket URL: `wss://cryptcomm-backend.onrender.com`
+
+> **Important**: Render's free tier spins down after 15 minutes of inactivity. See the "Keep Backend Alive" section below for a solution.
 
 ## Step 3: Deploy Frontend to Vercel
 
@@ -93,9 +102,9 @@ git push -u origin main
    - Add:
      ```
      Name: NEXT_PUBLIC_WS_URL
-     Value: wss://your-railway-app.up.railway.app
+     Value: wss://cryptcomm-backend.onrender.com
      ```
-   - Replace `your-railway-app.up.railway.app` with your actual Railway backend URL
+   - Replace `cryptcomm-backend.onrender.com` with your actual Render backend URL
 
 4. **Deploy**
    - Click "Deploy"
@@ -104,15 +113,15 @@ git push -u origin main
 
 ## Step 4: Update CORS Configuration
 
-1. **Go back to Railway**
-   - Open your backend project
-   - Go to "Variables" tab
+1. **Go back to Render**
+   - Open your backend service dashboard
+   - Go to "Environment" tab
    - Update `CORS_ORIGIN` to your Vercel URL:
      ```
      CORS_ORIGIN=https://your-app.vercel.app
      ```
    - If you have a custom domain, use that instead
-   - Save changes (Railway will auto-redeploy)
+   - Click "Save Changes" (Render will auto-redeploy)
 
 ## Step 5: Test Your Deployment
 
@@ -125,8 +134,35 @@ git push -u origin main
    - Try with multiple browser tabs/windows
 
 3. **Check backend health:**
-   - Visit: `https://your-railway-app.up.railway.app/health`
+   - Visit: `https://cryptcomm-backend.onrender.com/health`
    - Should return JSON with status
+
+## Step 6: Keep Backend Alive (Free Tier)
+
+Render's free tier spins down after 15 minutes of inactivity. To keep your backend running:
+
+1. **Go to Cron-job.org** (https://cron-job.org/)
+   - Sign up for a free account
+   - No credit card required
+
+2. **Create a Cron Job**
+   - Click "Create cronjob"
+   - **Title**: `CryptComm Backend Keep Alive`
+   - **URL**: `https://cryptcomm-backend.onrender.com/health`
+   - Replace with your actual Render URL
+   - **Schedule**: Select "Every 5 minutes" or "Every 10 minutes"
+     - **Recommended**: Every 5 minutes (more reliable)
+     - Alternatively: Every 10 minutes (less frequent)
+   - **Enable**: Turn on the job
+   - Click "Create"
+
+3. **Verify the Cron Job**
+   - The cron job will ping your backend every 5-10 minutes
+   - This prevents Render from spinning down due to inactivity
+   - Your backend will stay active and respond faster
+   - Check the "History" tab on cron-job.org to see successful pings
+
+> **Note**: While this keeps your backend alive, the first request after a spin-down (if any) may still take 30-60 seconds. The cron job minimizes this by keeping the service active.
 
 ## Custom Domains (Optional)
 
@@ -134,12 +170,12 @@ git push -u origin main
 1. Go to your Vercel project → Settings → Domains
 2. Add your custom domain (e.g., `cryptcomm.yourdomain.com`)
 3. Follow DNS configuration instructions
-4. Update Railway `CORS_ORIGIN` to your custom domain
+4. Update Render `CORS_ORIGIN` to your custom domain
 
-### Railway Custom Domain
-1. Go to Railway project → Settings → Domains
+### Render Custom Domain
+1. Go to Render service → Settings → Custom Domain
 2. Add custom domain
-3. Configure DNS records
+3. Configure DNS records (CNAME or A record)
 4. Update Vercel environment variable `NEXT_PUBLIC_WS_URL` to use your custom domain with `wss://` protocol
 
 ## Environment Variables Reference
@@ -147,7 +183,7 @@ git push -u origin main
 ### Frontend (Vercel)
 - `NEXT_PUBLIC_WS_URL`: WebSocket server URL (format: `wss://your-backend-domain`)
 
-### Backend (Railway)
+### Backend (Render)
 - `PORT`: Port number (default: 3001)
 - `NODE_ENV`: Environment (production)
 - `CORS_ORIGIN`: Allowed frontend origin (format: `https://your-frontend-domain`)
@@ -157,12 +193,13 @@ git push -u origin main
 ### WebSocket Connection Failed
 - Check `NEXT_PUBLIC_WS_URL` in Vercel environment variables
 - Ensure it uses `wss://` (not `ws://`)
-- Verify Railway backend is running: check `/health` endpoint
+- Verify Render backend is running: check `/health` endpoint
+- If backend is spinning down, set up the cron job (see Step 6)
 
 ### CORS Errors
-- Verify `CORS_ORIGIN` in Railway matches your exact Vercel URL
+- Verify `CORS_ORIGIN` in Render matches your exact Vercel URL
 - Include protocol (`https://`) and no trailing slash
-- Redeploy Railway after changing environment variables
+- Redeploy Render after changing environment variables
 
 ### Build Failures
 
@@ -171,8 +208,8 @@ git push -u origin main
 - Ensure `frontend` root directory is set
 - Verify all dependencies are in `frontend/package.json`
 
-**Railway:**
-- Check deployment logs in Railway dashboard
+**Render:**
+- Check deployment logs in Render dashboard
 - Ensure `backend` root directory is set
 - Verify `dist/` folder is being created by TypeScript build
 
@@ -182,9 +219,13 @@ git push -u origin main
 - Verify encryption keys are being generated
 - Test with `/health` endpoint to ensure backend is responsive
 
+### Backend Spinning Down (Free Tier)
+- Set up a cron job on cron-job.org to ping your backend every 5-10 minutes
+- See "Step 6: Keep Backend Alive" section above
+
 ## Continuous Deployment
 
-Both Vercel and Railway automatically deploy on git push:
+Both Vercel and Render automatically deploy on git push:
 
 1. Make changes locally
 2. Commit and push to GitHub:
@@ -193,7 +234,7 @@ Both Vercel and Railway automatically deploy on git push:
    git commit -m "Your commit message"
    git push
    ```
-3. Vercel and Railway will automatically build and deploy
+3. Vercel and Render will automatically build and deploy
 
 ## Monitoring
 
@@ -201,16 +242,16 @@ Both Vercel and Railway automatically deploy on git push:
 - Dashboard shows: deployments, analytics, errors
 - View logs: Project → Deployments → Select deployment → View Function Logs
 
-### Railway
+### Render
 - Dashboard shows: deployments, metrics, logs
-- View logs: Project → Deployments → View Logs
-- Monitor resource usage in Metrics tab
+- View logs: Service → Logs tab
+- Monitor resource usage and events in the dashboard
 
 ## Costs
 
 ### Free Tier Limits (as of 2026)
 - **Vercel**: 100 GB bandwidth, unlimited deployments
-- **Railway**: $5 free credit/month, ~500 hours execution time
+- **Render**: 750 hours/month free (equivalent to one always-on service), but services spin down after 15 minutes of inactivity
 
 For production with high traffic, consider upgrading to paid plans.
 
@@ -225,11 +266,11 @@ For production with high traffic, consider upgrading to paid plans.
 ## Scaling
 
 ### Horizontal Scaling
-- Railway: Increase replicas in service settings
+- Render: Upgrade to paid plan for multiple instances
 - Vercel: Automatically scales based on traffic
 
 ### Vertical Scaling
-- Railway: Upgrade to higher-tier plan for more resources
+- Render: Upgrade to higher-tier plan for more resources (Starter, Standard, Pro plans)
 
 ## Backup Strategy
 
@@ -246,20 +287,18 @@ git add .
 git commit -m "Update description"
 git push
 
-# Check Vercel deployment status
+# Trigger manual deploy on Vercel (if Vercel CLI installed)
 vercel --prod
 
-# Check Railway deployment status (if Railway CLI installed)
-railway status
-
-# View Railway logs (if Railway CLI installed)
-railway logs
+# View Render logs (via dashboard - no CLI needed for basic operations)
+# Visit: https://dashboard.render.com → Select your service → Logs tab
 ```
 
 ## Support
 
 - Vercel Docs: https://vercel.com/docs
-- Railway Docs: https://docs.railway.app/
+- Render Docs: https://render.com/docs
+- Cron-job.org Help: https://cron-job.org/en/documentation/
 - GitHub Issues: Create an issue in your repository
 
 ---

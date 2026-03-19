@@ -192,15 +192,16 @@ docker-compose -f docker-compose.dev.yml up --build
 docker-compose up --build
 ```
 
-### Cloud Deployment (Vercel + Railway)
+### Cloud Deployment (Vercel + Render)
 
-For detailed deployment instructions to Vercel (frontend) and Railway (backend), see [DEPLOYMENT.md](DEPLOYMENT.md).
+For detailed deployment instructions to Vercel (frontend) and Render (backend), see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 **Quick Start:**
 1. Push code to GitHub
-2. Deploy backend to Railway (set root to `backend/`)
+2. Deploy backend to Render (set root to `backend/`)
 3. Deploy frontend to Vercel (set root to `frontend/`)
 4. Configure environment variables on both platforms
+5. Set up cron job to keep backend alive (see DEPLOYMENT.md)
 
 ### Environment Variables
 

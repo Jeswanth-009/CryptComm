@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: cryptcomm-backend
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install --include=dev && npm run build
+    startCommand: cd backend && npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: CORS_ORIGIN
+        sync: false
+    healthCheckPath: /health
