@@ -319,13 +319,6 @@ Response:
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Shadcn/ui](https://ui.shadcn.com/) for the beautiful UI components
-- [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) for browser-native cryptography
-- [ws](https://github.com/websockets/ws) for WebSocket implementation
-
 ---
 
 <div align="center">
